@@ -42,6 +42,10 @@ class TodoListState extends State<TodoList> {
     setState(() => _todoItems.add("OK - "+valore));
   }
 
+  void _clearLista() {
+    setState(() => _todoItems.clear());
+  }
+
   void _promptRemoveTodoItem(int index) {
     showDialog(
         context: context,
@@ -50,7 +54,7 @@ class TodoListState extends State<TodoList> {
               title: new Text('Hai preso "${_todoItems[index]}"?'),
               actions: <Widget>[
                 new FlatButton(
-                    child: new Text('ESCI'),
+                    child: new Text('NO'),
                     // The alert is actually part of the navigation stack, so to close it, we
                     // need to pop it.
                     onPressed: () => Navigator.of(context).pop()
@@ -59,6 +63,32 @@ class TodoListState extends State<TodoList> {
                     child: new Text('PRESO'),
                     onPressed: () {
                       _removeTodoItem(index);
+                      Navigator.of(context).pop();
+                    }
+                )
+              ]
+          );
+        }
+    );
+  }
+
+  void _promptClearLista() {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return new AlertDialog(
+              title: new Text('Nuova lista?'),
+              actions: <Widget>[
+                new FlatButton(
+                    child: new Text('NO'),
+                    // The alert is actually part of the navigation stack, so to close it, we
+                    // need to pop it.
+                    onPressed: () => Navigator.of(context).pop()
+                ),
+                new FlatButton(
+                    child: new Text('SI'),
+                    onPressed: () {
+                      _clearLista();
                       Navigator.of(context).pop();
                     }
                 )
@@ -78,6 +108,7 @@ class TodoListState extends State<TodoList> {
         if(index < _todoItems.length) {
           return _buildTodoItem(_todoItems[index], index);
         }
+        return null;
       }
     );
   }
@@ -85,8 +116,8 @@ class TodoListState extends State<TodoList> {
   // Build a single todo item
   Widget _buildTodoItem(String todoText, int index) {
     return new ListTile(
-        title: new Text(todoText),
-        // onLongPress: () => _promptRemoveTodoItem(index)
+        title: new Text(todoText, style: TextStyle(fontSize: 50.0)),
+
         onLongPress: (){
           if(!_todoItems[index].startsWith("OK")){
             _promptRemoveTodoItem(index);
@@ -119,10 +150,10 @@ class TodoListState extends State<TodoList> {
               ),
               FloatingActionButton(
                 child: Icon(
-                    Icons.star
+                    Icons.delete
                 ),
                 onPressed: () {
-
+                  _promptClearLista();
                 },
                 heroTag: null,
               )
@@ -140,7 +171,7 @@ class TodoListState extends State<TodoList> {
             builder: (context) {
               return new Scaffold(
                   appBar: new AppBar(
-                      title: new Text('Add a new task')
+                      title: new Text('Aggiungi elemento')
                   ),
                   body: new TextField(
                     autofocus: true,
@@ -149,7 +180,7 @@ class TodoListState extends State<TodoList> {
                       Navigator.pop(context); // Close the add todo screen
                     },
                     decoration: new InputDecoration(
-                        hintText: 'Enter something to do...',
+                        hintText: 'Descrizione...',
                         contentPadding: const EdgeInsets.all(16.0)
                     ),
                   )
