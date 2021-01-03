@@ -1,5 +1,6 @@
 // Import MaterialApp and other widgets which we can use to quickly create a material app
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // Code written in Dart starts exectuting from the main function. runApp is part of
 // Flutter, and requires the component which will be our app's container. In Flutter,
@@ -26,12 +27,19 @@ class TodoList extends StatefulWidget {
 class TodoListState extends State<TodoList> {
   List<String> _todoItems = [];
 
+  @override
+  void initState() {
+    _leggiLista();
+    super.initState();
+  }
+
   void _addTodoItem(String task) {
     // Only add the task if the user actually entered something
     if(task.length > 0) {
       // Putting our code inside "setState" tells the app that our state has changed, and
       // it will automatically re-render the list
       setState(() => _todoItems.add(task));
+      _salvaLista();
     }
   }
 
@@ -40,10 +48,12 @@ class TodoListState extends State<TodoList> {
     String valore = _todoItems.elementAt(index);
     setState(() => _todoItems.removeAt(index));
     setState(() => _todoItems.add("OK - "+valore));
+    _salvaLista();
   }
 
   void _clearLista() {
     setState(() => _todoItems.clear());
+    _cancellaSalvataggioLista();
   }
 
   void _promptRemoveTodoItem(int index) {
@@ -121,6 +131,7 @@ class TodoListState extends State<TodoList> {
         onLongPress: (){
           if(!_todoItems[index].startsWith("OK")){
             _promptRemoveTodoItem(index);
+            _salvaLista();
           }
         },
     );
@@ -160,6 +171,21 @@ class TodoListState extends State<TodoList> {
             ]
         )
     );
+  }
+
+  _cancellaSalvataggioLista() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.remove('lista_della_spesa');
+  }
+
+  _leggiLista() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() => _todoItems = prefs.getStringList('lista_della_spesa') ?? []);
+  }
+
+  _salvaLista() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setStringList("lista_della_spesa", _todoItems);
   }
 
   void _pushAddTodoScreen() {
